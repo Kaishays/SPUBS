@@ -1,4 +1,14 @@
-from ModelRuntime import AllMiniLML6V2Extractor 
+import os
+from dotenv import find_dotenv, load_dotenv
+import sys
+import os
+
+# Make python aware of parent directories. 
+current_dir = os.path.dirname(os.path.realpath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+
+from ModelRuntime.AllMiniLML6V2Extractor import AllMiniLML6V2Extractor
 from GetEmbeddingsFromDb import reconstruct_embeddings
 from Modules import ReadSentencesFromDb 
 from ComputeMostSimilarEmbeddings import get_top_k_similar_vectors
@@ -6,18 +16,20 @@ from NormalizedQuery import get_normalized_query_vector
 
 
 def main():
-    # --- CONFIGURATION ---
+
+    load_dotenv(find_dotenv())
+
     DB_CONFIG = {
-        "host": "localhost",
-        "port": 3306,
-        "user": "root",
-        "password": "132312ADADADAqeqeqeqe#!#!#!#!!#!KJLKJ",
-        "database": "harry_potter_semantics"
+        "host": os.getenv("DB_HOST", "localhost"), 
+        "port": int(os.getenv("DB_PORT", 3306)),   
+        "user": os.getenv("DB_USER"),
+        "password": os.getenv("DB_PASSWORD"),
+        "database": os.getenv("DB_NAME")
     }
+
     EMBEDDING_TABLE = "all-minilm-l6-v2"
     SENTENCE_TABLE = "harrypottersentences"
-    MODEL_PATH = r'C:\Git\BERT\HP-Semantic Search\all-MiniLM-L6-v2'
-    BOOK_ID = 7 # Adjust if you processed a different book
+    MODEL_PATH = r'C:\Git\BERT\HP-Semantic Search\Models\all-MiniLM-L6-v2'
     
     print("--- Initializing Semantic Search App ---")
     
@@ -29,22 +41,19 @@ def main():
         return
 
     # 2. Load Embeddings from DB into memory (Once)
-    # This allows for lightning-fast searching without DB overhead per query
     db_vectors = reconstruct_embeddings(
         **DB_CONFIG, 
         table=EMBEDDING_TABLE
     )
     
     if not db_vectors:
-        print("No embeddings found. Please run your embedding manager script first.")
+        print("No embeddings found. Please run embedding manager script first.")
         return
 
     # 3. Load Sentences from DB (Once)
-    # We need this to turn truncatedTextIds back into readable text
     sentences_text_map = ReadSentencesFromDb.reconstruct_sentences(
         **DB_CONFIG, 
-        table=SENTENCE_TABLE, 
-        bookId=BOOK_ID
+        table=SENTENCE_TABLE
     )
 
     print("\nInitialization Complete. System is ready.")

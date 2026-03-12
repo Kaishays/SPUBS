@@ -1,6 +1,16 @@
+import sys
+import os
+from dotenv import find_dotenv, load_dotenv
+
+
+# Make python aware of parent directories. 
+current_dir = os.path.dirname(os.path.realpath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+
 import mysql.connector
 from Modules import ReadSentencesFromDb
-from ModelRuntime import AllMiniLML6V2Extractor 
+from ModelRuntime.AllMiniLML6V2Extractor import AllMiniLML6V2Extractor
 
 def process_and_store_embeddings(db_config, source_table, target_table, book_id, model_path):
     # 1. Reconstruct sentences from the database using ReadSentencesFromDb
@@ -88,18 +98,20 @@ def process_and_store_embeddings(db_config, source_table, target_table, book_id,
 # Execution
 # ==========================================
 if __name__ == "__main__":
+    load_dotenv(find_dotenv())
+
     DB_CONFIG = {
-        "host": "localhost",
-        "port": 3306,
-        "user": "root",
-        "password": "132312ADADADAqeqeqeqe#!#!#!#!!#!KJLKJ",
-        "database": "harry_potter_semantics"
+        "host": os.getenv("DB_HOST", "localhost"), 
+        "port": int(os.getenv("DB_PORT", 3306)),   
+        "user": os.getenv("DB_USER"),
+        "password": os.getenv("DB_PASSWORD"),
+        "database": os.getenv("DB_NAME")
     }
     
     SOURCE_TABLE = "harrypottersentences"
     TARGET_TABLE = "all-minilm-l6-v2" 
-    TARGET_BOOK_ID = 7
-    MODEL_PATH = r'C:\Git\BERT\HP-Semantic Search\all-MiniLM-L6-v2'
+    TARGET_BOOK_ID = 6
+    MODEL_PATH = r'C:\Git\BERT\HP-Semantic Search\models\all-MiniLM-L6-v2'
 
     process_and_store_embeddings(
         db_config=DB_CONFIG,

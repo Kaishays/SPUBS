@@ -1,7 +1,7 @@
 import mysql.connector
 from collections import defaultdict
 
-def reconstruct_sentences(host, port, user, password, database, table, bookId):
+def reconstruct_sentences(host, port, user, password, database, table):
     """
     Connects to the database, fetches characters for a specific book, 
     and reconstructs the original sentences.
@@ -21,12 +21,11 @@ def reconstruct_sentences(host, port, user, password, database, table, bookId):
         query = f"""
             SELECT textId, charElement
             FROM `{table}`
-            WHERE bookID = %s
             ORDER BY textId ASC
         """
         
-        print(f"Fetching characters for bookId {bookId}...")
-        cur.execute(query, (bookId,))
+        print(f"Fetching characters...")
+        cur.execute(query)
         rows = cur.fetchall()
 
         # We will use a defaultdict initialized with empty strings to append characters
@@ -65,31 +64,5 @@ def reconstruct_sentences(host, port, user, password, database, table, bookId):
             cur.close()
         if 'conn' in locals() and conn.is_connected():
             conn.close()
-
-# ==========================================
-# Example Usage
-# ==========================================
-if __name__ == "__main__":
-    # Replace these with your actual database credentials
-    DB_HOST = "localhost"
-    DB_PORT = 3306
-    DB_USER = "root"
-    DB_PASSWORD = "132312ADADADAqeqeqeqe#!#!#!#!!#!KJLKJ"
-    DB_NAME = "harry_potter_semantics"
-    TABLE_NAME = "harrypottersentences"
-    TARGET_BOOK_ID = 7  # The bookId you want to reconstruct
-
-    sentences_dict = reconstruct_sentences(
-        host=DB_HOST,
-        port=DB_PORT,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        database=DB_NAME,
-        table=TABLE_NAME,
-        bookId=TARGET_BOOK_ID
-    )
-
-    # Print out the first 5 reconstructed sentences to verify
-    print("\n--- Sample Output ---")
     
    

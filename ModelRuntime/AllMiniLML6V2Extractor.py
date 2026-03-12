@@ -45,32 +45,3 @@ class AllMiniLML6V2Extractor:
         
         normalized_embeddings = embeddings / norms
         return normalized_embeddings
-
-
-# ==========================================
-# Example Usage / Quick Test
-# ==========================================
-if __name__ == "__main__":
-    test_path = 'all-MiniLM-L6-v2' # Using HF hub name for general testing
-    
-    # 1. Instantiate the class
-    extractor = AllMiniLML6V2Extractor(test_path)
-    
-    # 2. Define test data
-    test_sentences = ["Harry raised his wand.", "The Dementor swooped down."]
-    
-    # 3. Generate embeddings using the built-in normalization
-    test_embeddings_auto = extractor.generate_embeddings(test_sentences, normalize=True)
-    
-    # 4. Generate raw embeddings and manually normalize them
-    test_embeddings_raw = extractor.generate_embeddings(test_sentences, normalize=False)
-    test_embeddings_manual = extractor.normalize_manual(test_embeddings_raw)
-    
-    print(f"Generated {len(test_embeddings_auto)} embeddings.")
-    print(f"Dimensions of first embedding: {len(test_embeddings_auto[0])}")
-    
-    # Quick check to prove vectors are normalized (magnitude should be ~1.0)
-    magnitude_auto = np.linalg.norm(test_embeddings_auto[0])
-    magnitude_manual = np.linalg.norm(test_embeddings_manual[0])
-    print(f"Magnitude of auto-normalized vector: {magnitude_auto:.4f}")
-    print(f"Magnitude of manually normalized vector: {magnitude_manual:.4f}")

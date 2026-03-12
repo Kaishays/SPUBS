@@ -77,39 +77,3 @@ def reconstruct_embeddings(host, port, user, password, database, table):
             cur.close()
         if 'conn' in locals() and conn.is_connected():
             conn.close()
-
-# ==========================================
-# Example Usage / Quick Test
-# ==========================================
-if __name__ == "__main__":
-    DB_CONFIG = {
-        "host": "localhost",
-        "port": 3306,
-        "user": "root",
-        "password": "132312ADADADAqeqeqeqe#!#!#!#!!#!KJLKJ",
-        "database": "harry_potter_semantics"
-    }
-    
-    # Using the table name from your previous DELETE snippet
-    TABLE_NAME = "all-minilm-l6-v2"
-    
-    vectors_dict = reconstruct_embeddings(
-        host=DB_CONFIG["host"],
-        port=DB_CONFIG["port"],
-        user=DB_CONFIG["user"],
-        password=DB_CONFIG["password"],
-        database=DB_CONFIG["database"],
-        table=TABLE_NAME
-    )
-    
-    # Quick verification test
-    if vectors_dict:
-        # Grab the first key-value pair to inspect it
-        sample_key = next(iter(vectors_dict))
-        sample_vector = vectors_dict[sample_key]
-        
-        print(f"\n--- Verification ---")
-        print(f"Sample truncatedTextId: {sample_key}")
-        print(f"Vector dimensions: {len(sample_vector)} (Should be 384)")
-        print(f"Vector data type: {type(sample_vector)}")
-        print(f"First 5 elements: {sample_vector[:5]}")

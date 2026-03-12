@@ -22,11 +22,3 @@ def pdf_to_sentences(pdf_path):
     sentences = sent_tokenize(cleaned_text)
     
     return sentences
-
-# --- Execution ---
-# pdf_file_path = r".\data\Book7.pdf"
-# sentence_array = pdf_to_sentences(pdf_file_path)
-
-# To see it line-by-line:
-# for i, s in enumerate(sentence_array):
-#     print(f"Sentence {i}: {s}")
