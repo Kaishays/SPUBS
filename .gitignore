@@ -1,0 +1,53 @@
+# =========================
+# VS Code / Editor Files
+# =========================
+.vscode/
+*.code-workspace
+
+# =========================
+# Python Cache & Bytecode
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# =========================
+# Virtual Environments
+# =========================
+.venv/
+venv/
+env/
+ENV/
+
+# =========================
+# Environment Variables & Secrets
+# =========================
+# NEVER commit your secrets!
+.env
+.env.local
+
+# =========================
+# Logs and Databases
+# =========================
+*.log
+*.sqlite3
+
+# =========================
+# OS Generated Files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Testing & Coverage
+# =========================
+.pytest_cache/
+.coverage
+htmlcov/
+
+# =========================
+# Build & Distribution
+# =========================
+build/
+dist/
+*.egg-info/
