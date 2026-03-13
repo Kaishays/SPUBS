@@ -48,7 +48,6 @@ def insert_sentences(sentences, host, port, user, password, database, table, pdf
                 for char in sentence:
 
                     textId = (pdfId * bookIdFactor) + (sentenceIndex * sentenceIndexFactor) + charIndex
-                    print(charIndex)
                     char_data.append((textId, sentenceIndex, pdfId, charIndex, char))
                     charIndex += 1
 
@@ -60,7 +59,7 @@ def insert_sentences(sentences, host, port, user, password, database, table, pdf
                 
         # Commit once at the very end for maximum speed
         conn.commit()
-        # Changed to -1 so it prints the actual number of completed sentences
+
         print(f"Successfully imported {sentenceIndex - 1} sentences.")
 
     except Exception as e:

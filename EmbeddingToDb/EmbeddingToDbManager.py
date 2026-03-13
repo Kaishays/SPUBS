@@ -12,41 +12,38 @@ from Modules import ReadSentencesFromDb
 from ModelRuntime.AllMiniLML6V2Extractor import AllMiniLML6V2Extractor
 
 def process_and_store_embeddings(db_config, sentence_table, embedding_table, pdf_id, model_path):
-    # 1. Reconstruct sentences from the database using ReadSentencesFromDb
-    print(f"Fetching and reconstructing sentences for bookId {pdf_id}...")
-    sentences_dict = ReadSentencesFromDb.reconstruct_sentences(
+
+    print(f"Fetching and reconstructing sentences for pdfId {pdf_id}...")
+    sentences_dict = ReadSentencesFromDb.reconstructSinglePdfSentences(
         host=db_config['host'],
         port=db_config['port'],
         user=db_config['user'],
         password=db_config['password'],
         database=db_config['database'],
         table=sentence_table,
-        bookId=pdf_id
+        pdfId=pdf_id
     )
 
     if not sentences_dict:
         print("No sentences retrieved. Exiting process.")
         return
 
-    # 2. Initialize the Extractor Manager using the new class
     extractor = AllMiniLML6V2Extractor(model_path)
 
-    # 3. Extract IDs and sentences into aligned lists for batch processing
     truncated_ids = list(sentences_dict.keys())
     sentences_list = list(sentences_dict.values())
 
-    # 4. Generate embeddings in a single batch (highly optimized)
     print(f"Generating embeddings for {len(sentences_list)} sentences. This might take a moment...")
     embeddings_matrix = extractor.generate_embeddings(sentences_list)
 
-    # 5. Connect to DB and insert the results
     print("Connecting to database for insertion...")
     try:
         conn = mysql.connector.connect(**db_config)
         cur = conn.cursor()
 
-        columns_env = os.getenv("EMBEDDING_COLUMNS", "embeddingId,embeddingIndex,embeddingElementNormalized")
-        columns_list = [col.strip() for col in columns_env.split(',')]
+        embeddingSqlColumnNames = os.getenv("EMBEDDING_COLUMNS")
+
+        columns_list = [col.strip() for col in embeddingSqlColumnNames.split(',')]
         
         formatted_columns = ", ".join([f"`{col}`" for col in columns_list])
         
@@ -64,20 +61,19 @@ def process_and_store_embeddings(db_config, sentence_table, embedding_table, pdf
             if vector_norm <= 0:
                vector_norm = 1e-10 
 
-            for vector_index, value in enumerate(embedding_vector):
-                vector_index_oneBased  = vector_index + 1 
+            for vectorElementIndex, value in enumerate(embedding_vector):
+                embeddingIndexOneBased  = vectorElementIndex + 1 
                 normValue = value / vector_norm
 
-                # Compute absolute unique ID (truncatedTextId * 1000 + the 0-383 vector index)
-                new_embedding_id = (truncated_text_id * 1000) + vector_index_oneBased
+                new_embedding_id = (truncated_text_id * 1000) + embeddingIndexOneBased
                 
                 batch_data.append((
                     new_embedding_id, 
-                    vector_index_oneBased,    # Maps to your 'embeddingIndex' (smallint unsigned)
-                    float(normValue)     # Maps to your 'embeddingElement' (float)
+                    embeddingIndexOneBased,    
+                    float(normValue)   
                 ))
 
-                # Insert in batches
+                # Insert embeddings to MySql in batches
                 if len(batch_data) >= batch_size:
                     cur.executemany(insert_query, batch_data)
                     conn.commit()

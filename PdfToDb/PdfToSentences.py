@@ -1,24 +1,18 @@
 import fitz  # PyMuPDF
-import nltk
 from nltk.tokenize import sent_tokenize
 
-# This downloads the logic needed to detect sentence boundaries (run once)
-#nltk.download('punkt_tab')
-
 def pdf_to_sentences(pdf_path):
-    # 1. Open and extract text
+
     doc = fitz.open(pdf_path)
     full_text = ""
     for page in doc:
         full_text += page.get_text()
     doc.close()
     
-    # 2. Clean the text
-    # PDFs often have '\n' in the middle of sentences. 
-    # This join/split replaces all newlines and tabs with single spaces.
+    #Split returns a list of words, and join concatenates them with a single space, effectively removing extra spaces.
     cleaned_text = " ".join(full_text.split())
     
-    # 3. Convert string to array of sentences
+    # Use NLTK's sent_tokenize to split the cleaned text into sentences.
     sentences = sent_tokenize(cleaned_text)
     
     return sentences

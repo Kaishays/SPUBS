@@ -1,15 +1,13 @@
+import os
+from dotenv import load_dotenv
 import mysql.connector
 import numpy as np
 from collections import defaultdict
 
+load_dotenv()
+
 def reconstruct_embeddings(host, port, user, password, database, table):
-    """
-    Connects to the database, fetches all individual embedding elements,
-    and reconstructs the full 384-dimensional vectors.
     
-    Returns a dictionary:
-    { truncatedTextId (int): embedding_vector (numpy array) }
-    """
     print(f"Connecting to database to fetch embeddings from `{table}`...")
     
     try:
@@ -22,37 +20,37 @@ def reconstruct_embeddings(host, port, user, password, database, table):
         )
         cur = conn.cursor()
 
-        # By ordering by embeddingId ASC, we guarantee that the vector elements
-        # (index 0 to 383) are retrieved and appended in the exact correct order.
+        columns_env = os.getenv("EMBEDDING_COLUMNS")
+        columns_list = [col.strip() for col in columns_env.split(',')]
+        id_col = columns_list[0]      
+        element_col = columns_list[2]
+        
         query = f"""
-            SELECT embeddingId, embeddingElementNormalized
+            SELECT `{id_col}`, `{element_col}`
             FROM `{table}`
-            ORDER BY embeddingId ASC
+            ORDER BY `{id_col}` ASC
         """
         
         print("Executing query (this might take a moment depending on table size)...")
         cur.execute(query)
 
-        # Using a defaultdict to gather the 384 floats for each sentence
         embeddings_dict = defaultdict(list)
         
         print("Fetching rows and reconstructing vectors...")
         
-        # Fetching in chunks to prevent memory overflow if the table is massive
+        # Fetching in chunks to prevent memory overflow 
         chunk_size = 100000 
         while True:
             rows = cur.fetchmany(chunk_size)
             if not rows:
-                break # Exit the loop when no more rows are returned
+                break 
                 
             for row in rows:
                 embedding_id = row[0]
                 embedding_element = row[1]
                 
-                # Derive the parent truncatedEmbeddingId by reversing our previous math
                 truncated_embedding_id = embedding_id // 1000
                 
-                # Append the float to the sentence's vector list
                 embeddings_dict[truncated_embedding_id].append(embedding_element)
 
         # Convert standard Python lists to numpy arrays for semantic search operations
@@ -72,7 +70,6 @@ def reconstruct_embeddings(host, port, user, password, database, table):
         print(f"An unexpected error occurred: {e}")
         return {}
     finally:
-        # Always ensure connections are closed safely
         if 'cur' in locals() and cur:
             cur.close()
         if 'conn' in locals() and conn.is_connected():
