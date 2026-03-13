@@ -3,7 +3,7 @@
 ## Overview
 Semantic Search of PDFs using BERTs and MySQL (SPUBS) is a custom semantic search engine designed to parse PDF documents, extract their textual content, and make them searchable using natural language queries. Instead of relying on exact keyword matches, SPUBS utilizes BERT models for semantic search. 
 
-It achieves this by breaking the text into sentences, converting those sentences into mathematical representations defined by BERT embeddings, and storing the data in a highly granular MySQL database. When a user enters a search phrase, the system computes the similarity between the query's meaning and the stored sentences, returning the most contextually relevant results in milliseconds. 
+It achieves this by breaking the text into sentences, converting those sentences into mathematical representations defined by BERT embeddings, and storing the data in a MySQL database. When a user enters a search phrase, the system computes the similarity between the query's meaning and the stored sentences, returning the most contextually relevant results in milliseconds. 
 
 ## Environment Setup
 
