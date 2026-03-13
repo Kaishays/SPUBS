@@ -12,7 +12,7 @@ It achieves this by breaking the text into sentences, converting those sentences
     git clone https://github.com/Kaishays/SPUBS
     ```
 
-2.  **Install Dependencies** **Anaconda** was used for the SPUBS development environment. Install the necessary packages via the requirements file:
+2.  **Install Dependencies** Note: *Anaconda* was used for the SPUBS development environment. Install the necessary packages via the requirements file:
     ```bash
     pip install -r requirements.txt
     ```
