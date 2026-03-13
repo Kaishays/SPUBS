@@ -8,7 +8,7 @@ It achieves this by breaking the text into sentences, converting those sentences
 ---
 
 ## Database Structure
-SPUBS utilizes a MySQL database to store both the original text and the generated embeddings. The schema is highly granular, designed to store data at the element level for precise tracking and retrieval. Configuration and column names are managed via a `.env` file.
+SPUBS utilizes a MySQL database to store both the original text and the generated embeddings. Configuration and column names are managed via a `.env` file.
 
 * **Sentences Table (e.g., `pdf_sentences`)**
     * Sentences are stored character-by-character to allow for precise indexing and reconstruction.
