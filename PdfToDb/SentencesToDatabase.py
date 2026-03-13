@@ -1,26 +1,30 @@
+import os
 import mysql.connector
+from dotenv import load_dotenv
 
-def insert_sentences(sentences, host, port, user, password, database, table, pdfId):
+# Ensure environment variables are loaded
+load_dotenv()
+
+def insert_sentences(sentences, host, port, user, password, database, table, pdfId, log_path):
     if not sentences:
         return
 
     conn = mysql.connector.connect(host=host, port=port, user=user, password=password, database=database)
     cur = conn.cursor()
     
-    # We'll use a transaction to make this 100x faster
-    insert_sql = (f"INSERT INTO `{table}` (`textId`, `sentenceIndex`, `pdfId`, `charIndex`, `charElement`)"
-                  " VALUES (%s, %s, %s, %s, %s)")
+    columns_env = os.getenv("SENTENCE_COLUMNS")
     
+    columns_list = [col.strip() for col in columns_env.split(',')]
+    formatted_columns = ", ".join([f"`{col}`" for col in columns_list])
     
+    insert_sql = f"INSERT INTO `{table}` ({formatted_columns}) VALUES (%s, %s, %s, %s, %s)"
 
     try:
         bookIdFactor = 100_000_000
         sentenceIndexFactor = 1_000
         maxEmbeddingSize = 800
-
-        seen_ids = set()
         
-        with open("C:\\Git\\BERT\\HP-Semantic Search\\long_sentences_log.txt", "a", encoding="utf-8") as f:
+        with open(log_path, "a", encoding="utf-8") as f:
             
             sentenceIndex = 1
             for sentence in sentences:
@@ -41,25 +45,12 @@ def insert_sentences(sentences, host, port, user, password, database, table, pdf
                 charIndex = 1
                 
                 # 3. Loop through characters
-                #'But there is a cure in the house, and not outside it, no; not from others but from them, their bloody strife.'
-                # We sing to you, dark gods beneath the earth.
                 for char in sentence:
 
                     textId = (pdfId * bookIdFactor) + (sentenceIndex * sentenceIndexFactor) + charIndex
                     print(charIndex)
                     char_data.append((textId, sentenceIndex, pdfId, charIndex, char))
                     charIndex += 1
-
-                    # 2. NEW: Check if this ID is already in our set
-                    if textId in seen_ids:
-                        print(f"🚨 DUPLICATE DETECTED! ID {textId} was already generated.")
-                        print(f"   Occurred at Sentence {sentenceIndex}, Character {charIndex}")
-                        
-                        # Stop processing this sentence to prevent the DB crash
-                        break 
-                    else:
-                        # 3. NEW: If it's unique, add it to the set so we can track it
-                        seen_ids.add(textId)
 
                 # Insert the whole sentence's characters in one batch
                 if char_data:

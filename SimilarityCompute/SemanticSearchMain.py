@@ -1,9 +1,7 @@
 import os
 from dotenv import find_dotenv, load_dotenv
 import sys
-import os
 import time
-
 
 # Make python aware of parent directories. 
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -16,22 +14,22 @@ from Modules import ReadSentencesFromDb
 from ComputeMostSimilarEmbeddings import get_top_k_similar_vectors
 from NormalizedQuery import get_normalized_query_vector
 
-
 def main():
 
     load_dotenv(find_dotenv())
 
     DB_CONFIG = {
-        "host": os.getenv("DB_HOST", "localhost"), 
-        "port": int(os.getenv("DB_PORT", 3306)),   
+        "host": os.getenv("DB_HOST"), 
+        "port": int(os.getenv("DB_PORT")),   
         "user": os.getenv("DB_USER"),
         "password": os.getenv("DB_PASSWORD"),
         "database": os.getenv("DB_NAME")
     }
 
-    EMBEDDING_TABLE = "all-minilm-l6-v2"
-    SENTENCE_TABLE = "harrypottersentences"
-    MODEL_PATH = r'C:\Git\BERT\HP-Semantic Search\Models\all-MiniLM-L6-v2'
+    # Pulling parameters from .env
+    EMBEDDING_TABLE = os.getenv("EMBEDDING_TABLE")
+    SENTENCE_TABLE = os.getenv("SENTENCE_TABLE")
+    MODEL_PATH = os.getenv("MODEL_PATH")
     
     print("--- Initializing Semantic Search App ---")
     
