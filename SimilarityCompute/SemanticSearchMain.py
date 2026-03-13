@@ -2,6 +2,8 @@ import os
 from dotenv import find_dotenv, load_dotenv
 import sys
 import os
+import time
+
 
 # Make python aware of parent directories. 
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -59,6 +61,7 @@ def main():
     print("\nInitialization Complete. System is ready.")
     print("Type 'exit' or 'quit' to close the app.\n")
 
+
     # --- MAIN LOOP ---
     while True:
         user_query = input("\nEnter search phrase: ").strip()
@@ -69,6 +72,9 @@ def main():
         
         if not user_query:
             continue
+
+        # Start the timer (measuring performance, excluding human typing time)
+        start_time = time.perf_counter()
 
         # 4. Process Query
         # Turns text into a normalized 384-dimensional vector
@@ -92,6 +98,12 @@ def main():
             
             print(f"{i}. [Score: {score:.4f}] (ID: {text_id})")
             print(f"   {sentence_text}\n")
+
+        # Stop the timer and convert seconds to milliseconds
+        end_time = time.perf_counter()
+        elapsed_ms = (end_time - start_time) * 1000
+        
+        print(f"⏱️  Search completed in {elapsed_ms:.2f} ms")
 
 if __name__ == "__main__":
     main()

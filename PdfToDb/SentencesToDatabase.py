@@ -1,6 +1,6 @@
 import mysql.connector
 
-def insert_sentences(sentences, host, port, user, password, database, table, bookId):
+def insert_sentences(sentences, host, port, user, password, database, table, pdfId):
     if not sentences:
         return
 
@@ -8,31 +8,31 @@ def insert_sentences(sentences, host, port, user, password, database, table, boo
     cur = conn.cursor()
     
     # We'll use a transaction to make this 100x faster
-    insert_sql = (f"INSERT INTO `{table}` (`textId`, `embeddingIndex`, `bookID`, `charIndex`, `charElement`)"
+    insert_sql = (f"INSERT INTO `{table}` (`textId`, `sentenceIndex`, `pdfId`, `charIndex`, `charElement`)"
                   " VALUES (%s, %s, %s, %s, %s)")
     
     
 
     try:
         bookIdFactor = 100_000_000
-        embeddingIndexFactor = 1_000
+        sentenceIndexFactor = 1_000
         maxEmbeddingSize = 800
 
         seen_ids = set()
         
         with open("C:\\Git\\BERT\\HP-Semantic Search\\long_sentences_log.txt", "a", encoding="utf-8") as f:
             
-            embeddingIndex = 1
+            sentenceIndex = 1
             for sentence in sentences:
                 if not sentence:
                     continue
 
-                if (embeddingIndex == 4):
-                    print(f"Debug: Processing sentence {embeddingIndex} with length {len(sentence)}")
+                if (sentenceIndex == 4):
+                    print(f"Debug: Processing sentence {sentenceIndex} with length {len(sentence)}")
                     print(f"Content: {sentence[:100]}...")  # Print the first 100 characters for context
 
                 if len(sentence) > maxEmbeddingSize:
-                    f.write(f"Index: {embeddingIndex} | Length: {len(sentence)}\n")
+                    f.write(f"Index: {sentenceIndex} | Length: {len(sentence)}\n")
                     f.write(f"Content: {sentence}\n")
                     f.write("-" * 50 + "\n")
                     continue
@@ -45,15 +45,15 @@ def insert_sentences(sentences, host, port, user, password, database, table, boo
                 # We sing to you, dark gods beneath the earth.
                 for char in sentence:
 
-                    textId = (bookId * bookIdFactor) + (embeddingIndex * embeddingIndexFactor) + charIndex
+                    textId = (pdfId * bookIdFactor) + (sentenceIndex * sentenceIndexFactor) + charIndex
                     print(charIndex)
-                    char_data.append((textId, embeddingIndex, bookId, charIndex, char))
+                    char_data.append((textId, sentenceIndex, pdfId, charIndex, char))
                     charIndex += 1
 
                     # 2. NEW: Check if this ID is already in our set
                     if textId in seen_ids:
                         print(f"🚨 DUPLICATE DETECTED! ID {textId} was already generated.")
-                        print(f"   Occurred at Sentence {embeddingIndex}, Character {charIndex}")
+                        print(f"   Occurred at Sentence {sentenceIndex}, Character {charIndex}")
                         
                         # Stop processing this sentence to prevent the DB crash
                         break 
@@ -65,12 +65,12 @@ def insert_sentences(sentences, host, port, user, password, database, table, boo
                 if char_data:
                     cur.executemany(insert_sql, char_data)
                 
-                embeddingIndex += 1
+                sentenceIndex += 1
                 
         # Commit once at the very end for maximum speed
         conn.commit()
         # Changed to -1 so it prints the actual number of completed sentences
-        print(f"Successfully imported {embeddingIndex - 1} sentences.")
+        print(f"Successfully imported {sentenceIndex - 1} sentences.")
 
     except Exception as e:
         print(f"An error occurred: {e}")

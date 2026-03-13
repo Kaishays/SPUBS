@@ -108,8 +108,8 @@ if __name__ == "__main__":
         "database": os.getenv("DB_NAME")
     }
     
-    SOURCE_TABLE = "harrypottersentences"
-    TARGET_TABLE = "all-minilm-l6-v2" 
+    SOURCE_TABLE = "pdf_sentences"
+    TARGET_TABLE = "all-minilm-l6-v2_embeddings" 
     TARGET_BOOK_ID = 6
     MODEL_PATH = r'C:\Git\BERT\HP-Semantic Search\models\all-MiniLM-L6-v2'
 
