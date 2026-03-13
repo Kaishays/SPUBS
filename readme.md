@@ -10,7 +10,6 @@ It achieves this by breaking the text into sentences, converting those sentences
 1.  **Clone the Repository** Copy the project files to your local machine:
     ```bash
     git clone https://github.com/Kaishays/SPUBS
-    cd <repository-folder>
     ```
 
 2.  **Install Dependencies** **Anaconda** was used for the SPUBS development environment. Install the necessary packages via the requirements file:
