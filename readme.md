@@ -9,7 +9,7 @@ It achieves this by breaking the text into sentences, converting those sentences
 
 1.  **Clone the Repository** Copy the project files to your local machine:
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/Kaishays/SPUBS
     cd <repository-folder>
     ```
 
