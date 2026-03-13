@@ -61,7 +61,7 @@ The data extraction pipeline is split into a few focused scripts:
 ## BERT and Embedding Logic
 The core "intelligence" of the application lives in the `AllMiniLML6V2Extractor.py` class. 
 
-* **The Model:** Utilizes [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2), a fast and efficient BERT-based model that maps natural language to a 384-dimensional dense vector space.
+* **The Model:** Utilizes [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2), a small BERT-based model that maps natural language to a 384-dimensional dense vector space.
 * **Generation:** The database manager (`EmbeddingToDbManager.py`) reconstructs the full sentences from the character table, passes them to the Extractor in a single batch, and receives a matrix of embeddings.
 * **Normalization:** `EmbeddingToDbManager.py` applies L2 Normalization to the generated vectors before they are inserted into the DB.
 
