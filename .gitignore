@@ -22,9 +22,13 @@ ENV/
 # =========================
 # Environment Variables & Secrets
 # =========================
-# NEVER commit your secrets!
+# Ignore all standard .env files
 .env
-.env.local
+.env.*
+*.env
+
+# Explicitly allow sample.env to be tracked
+!sample.env
 
 # =========================
 # Logs and Databases

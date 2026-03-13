@@ -1,6 +1,6 @@
 import numpy as np
 
-def get_top_k_similar_vectors(query_vector, embeddings_dict, k=10):
+def get_top_k_similar_vectors(query_vector, embeddings_dict, k):
    
     results = []
 

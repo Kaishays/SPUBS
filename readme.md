@@ -5,10 +5,34 @@ Semantic Search of PDFs using BERTs and MySQL (SPUBS) is a custom semantic searc
 
 It achieves this by breaking the text into sentences, converting those sentences into mathematical representations defined by BERT embeddings, and storing the data in a highly granular MySQL database. When a user enters a search phrase, the system computes the similarity between the query's meaning and the stored sentences, returning the most contextually relevant results in milliseconds. 
 
+## Environment Setup
+
+1.  **Clone the Repository** Copy the project files to your local machine:
+    ```bash
+    git clone <repository-url>
+    cd <repository-folder>
+    ```
+
+2.  **Install Dependencies** **Anaconda** was used for the SPUBS development environment. Install the necessary packages via the requirements file:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3.  **Configure Environment Variables** Rename the template file and update it with your specific settings:
+    * Rename `sample.env` to `.env`.
+    * Open `.env` and fill in the required configuration values.
+
+
 ---
 
 ## Database Structure
 SPUBS utilizes a MySQL database to store both the original text and the generated embeddings. Configuration and column names are managed via a `.env` file.
+
+To quickly set up your local MySQL database with the exact table structures required, use the provided `schema_only.sql` script. Open your terminal, navigate to the project directory, and run the following command:
+```bash
+mysql -u root -p < schema_only.sql
+```
+*(You will be prompted to enter your MySQL password).*
 
 * **Sentences Table (e.g., `pdf_sentences`)**
     * Sentences are stored character-by-character to allow for precise indexing and reconstruction.
@@ -20,7 +44,13 @@ SPUBS utilizes a MySQL database to store both the original text and the generate
     * **Columns:** `embeddingId`, `embeddingIndex`, `embeddingElementNormalized` (The float value).
     * The `embeddingId` is calculated differently from `textId`: `(pdfId * 100,000,000) + (sentenceIndex * 1,000) + embeddingIndex`.
 
----
+# Building the Database 
+To populate the database, you will first add the extracted sentences from your target PDF and then compute their embeddings. After ensuring your `.env` variables are fully configured, execute the scripts in the following order:
+
+1. **Run `TextToDbManager.py`**: This parses the PDF and populates the sentences table.
+2. **Run `EmbeddingToDbManager.py`**: This computes the vector embeddings for the extracted sentences and populates the embeddings table.
+
+*Each of these pipelines is described in greater detail below.*
 
 ## PDF to Database Logic
 The data extraction pipeline is split into a few focused scripts:
@@ -33,7 +63,7 @@ The data extraction pipeline is split into a few focused scripts:
 ## BERT and Embedding Logic
 The core "intelligence" of the application lives in the `AllMiniLML6V2Extractor.py` class. 
 
-* **The Model:** It utilizes `sentence-transformers/all-MiniLM-L6-v2`, a fast and highly efficient BERT-based model that maps natural language to a 384-dimensional dense vector space.
+* **The Model:** Utilizes [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2), a fast and efficient BERT-based model that maps natural language to a 384-dimensional dense vector space.
 * **Generation:** The database manager (`EmbeddingToDbManager.py`) reconstructs the full sentences from the character table, passes them to the Extractor in a single batch, and receives a matrix of embeddings.
 * **Normalization:** `EmbeddingToDbManager.py` applies L2 Normalization to the generated vectors before they are inserted into the DB.
 
@@ -50,6 +80,56 @@ Because all vectors in the database are L2-normalized, calculating the semantic 
 
 ## Examples of Use
 
-To use the system, you interact with the `SemanticSearchMain.py` script via the command line. It loads the model, fetches the vectors from the database into memory, and waits for your input.
+To use the system, interact with the `SemanticSearchMain.py` script via the command line. The script loads the model, fetches the embeddings from the database into memory, and waits for your input.
 
-**Interactive CLI Session using Harry Potter books 5, 6, 7:**
+### Interactive CLI Session
+The following examples utilize data indexed from the *Harry Potter* series (Books 5, 6, and 7). 
+
+**Source PDFs:**
+* [Harry Potter and the Order of the Phoenix](https://afgjilibrary.wordpress.com/wp-content/uploads/2020/05/hp5-harry-potter-and-the-order-of-the-phoenix.pdf)
+* [Harry Potter and the Half-Blood Prince](https://kvongcmehsanalibrary.wordpress.com/wp-content/uploads/2021/07/harry-potter-and-the-half-blood-prince-j.k.-rowling.pdf)
+* [Harry Potter and the Deathly Hallows](https://vidyaprabodhinicollege.edu.in/VPCCECM/ebooks/ENGLISH%20LITERATURE/Harry%20potter/(Book%207)%20Harry%20Potter%20And%20The%20Deathly%20Hallows.pdf)
+
+```bash
+$ python SemanticSearchMain.py
+Loading model...
+Fetching vectors from database...
+System ready.
+
+Enter search phrase: Find a sentence related to a famous sword found in the bottom of an icy pond.
+Generating embeddings (normalized=True)...
+Calculating dot products against 41634 vectors...
+
+Results for: 'Find a sentence related to a famous sword found in the bottom of an icy pond.'
+--------------------------------------------------
+1. [Score: 0.5600] (ID: 709673)
+   “Where’s the sword?"
+
+2. [Score: 0.5538] (ID: 706460)
+   His brain itself seemed to have frozen as he pushed through the dark water to the bottom and reached out, groping for the sword.
+
+3. [Score: 0.5368] (ID: 712165)
+   It was cracked; the sword of Gryffindor lay beside it.
+
+⏱️ Search completed in 319.39 ms
+
+Enter search phrase: Find a sentence related to a hidden room in Hogwarts that only appears when one truly needs it.
+Generating embeddings (normalized=True)...
+Calculating dot products against 41634 vectors...
+Warning: Dimension mismatch for ID 608391. Skipping.
+
+Results for: 'Find a sentence related to a hidden room in Hogwarts that only appears when one truly needs it.'
+--------------------------------------------------
+1. [Score: 0.5903] (ID: 607033)
+   “The Room of Requirement,” repeated Harry.
+
+2. [Score: 0.5832] (ID: 605942)
+   “But, Harry, before you get all excited, I still don’t think you’ll be able to get into the Room of Requirement without knowing what’s there first."
+
+3. [Score: 0.5751] (ID: 704920)
+   “If there was one place that was really important to You-Know-Who, it was Hogwarts!” “Oh, come on,” scoffed Ron.
+
+⏱️ Search completed in 263.68 ms
+
+
+

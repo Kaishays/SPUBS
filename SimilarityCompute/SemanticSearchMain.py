@@ -74,7 +74,7 @@ def main():
         top_ids, top_scores = get_top_k_similar_vectors(
             query_vector=query_vector, 
             embeddings_dict=db_vectors, 
-            k=10
+            k=3
         )
         
         print(f"\nResults for: '{user_query}'")
