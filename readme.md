@@ -54,7 +54,7 @@ To populate the database, you will first add the extracted sentences from your t
 The data extraction pipeline is split into a few focused scripts:
 1.  **Text Extraction:** `PdfToSentences.py` uses `PyMuPDF` (`fitz`) to read the raw text from the PDF.
 2.  **Cleaning & Tokenization:** The raw text is cleaned of stray newlines/tabs and split into an array of distinct sentences using `nltk.tokenize.sent_tokenize`.
-3.  **Database Insertion:** `SentencesToDatabase.py` iterates through each sentence, breaks it down character-by-character, and uses batch insertion (`executemany`) to efficiently push thousands of characters into the MySQL database in a single transaction.
+3.  **Database Insertion:** `SentencesToDatabase.py` iterates through each sentence and uses batch insertion (`executemany`) to efficiently push thousands of characters into the MySQL database in a single transaction.
 
 ---
 
